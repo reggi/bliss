@@ -14,13 +14,11 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         const type = parameter.type
           ? extractType(parameter.type, typeChecker)
           : "any";
-        const paramName = ts.isIdentifier(parameter.name)
-          ? parameter.name.text
-          : "";
-        if (!paramName) {
+        const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : "";
+        if (paramName === "") {
           throw new Error("Parameter name is not an identifier.");
         }
-        const paramType = typeof type === 'string' ? type : type.map(t => ({ name: t.name, required: t.required, type: t.type }));
+        const paramType = typeof type === 'string' ? type : type.map((t: { name: string; required: boolean; type: string | string[] }) => ({ name: t.name, required: t.required, type: t.type }));
         return { name: paramName, required: !parameter.questionToken, type: paramType };
       });
 
@@ -93,10 +91,10 @@ function extractType(
         if (!memberName) {
           throw new Error("Member name is not an identifier.");
         }
-        return { name: memberName, required: !member.questionToken, type: typeName };
+        return memberName ? { name: memberName, required: !member.questionToken, type: typeName } : null;
       }
       return null;
-    }).filter(Boolean);
+    }).filter((p): p is { name: string; required: boolean; type: string } => p !== null);
     return properties.length > 0 ? `{ ${properties.map(p => `${p.name}: ${p.type}`).join(", ")} }` : "any";
   }
   return "any";
