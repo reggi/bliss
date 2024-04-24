@@ -1,11 +1,10 @@
 import ts from "npm:typescript";
-import { AstValues, Blissfile } from "./types.ts";
-import { createAstFromSource } from "./test_source.ts";
+import { AstValues, FunctionDef } from "./types.ts";
 
-export function parseFunctions(ast: AstValues): Blissfile[] {
+export function parseFunctions(ast: AstValues): FunctionDef[] {
   const { sourceFile } = ast;
   if (!sourceFile) return [];
-  let functionDefs: Blissfile[] = [];
+  const functionDefs: FunctionDef[] = [];
   ts.forEachChild(sourceFile, (node) => {
     if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node)) {
       const isDefault =
@@ -18,7 +17,7 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
         let type;
         if (typeNode) {
           if (ts.isTypeReferenceNode(typeNode)) {
-            type = typeNode.typeName.getText()
+            type = typeNode.typeName.getText();
             // Assuming the intent was to process members of a type literal or interface
             // The code to process type nodes should be implemented here
           } else {
@@ -37,9 +36,8 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
       // Correct the structure of the object being pushed to blissfile
       // Push the function definition to the blissfile array
       functionDefs.push({
-        type: 'function',
-        isDefault,
-        name: name || '',
+        default: isDefault,
+        name: name || "",
         parameters,
       });
     } else if (ts.isExportAssignment(node)) {
@@ -47,17 +45,21 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
       const defaultExport = true;
       const name = undefined;
       const expression = node.expression;
-      let parameters: { name: string; required: boolean; type: string | object; }[] = [];
+      let parameters: {
+        name: string;
+        required: boolean;
+        type: string;
+      }[] = [];
       if (
         ts.isArrowFunction(expression) ||
         ts.isFunctionExpression(expression)
       ) {
         parameters = expression.parameters.map((parameter) => {
           const typeNode = parameter.type;
-          let type;
+          let type: string;
           if (typeNode) {
             if (ts.isTypeReferenceNode(typeNode)) {
-              type = typeNode.typeName.getText()
+              type = typeNode.typeName.getText();
               // The code to process type nodes should be implemented here
             } else {
               type = typeNode.getText();
@@ -74,9 +76,8 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
       }
       // Push the function definition to the blissfile array
       functionDefs.push({
-        type: 'function',
-        isDefault: defaultExport,
-        name: name || '',
+        default: defaultExport,
+        name: name || "",
         parameters,
       });
     }
