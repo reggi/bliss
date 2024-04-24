@@ -2,11 +2,12 @@ import ts from "npm:typescript";
 import { AstValues, Blissfile } from "./types.ts";
 import { createAstFromSource } from "./test_source.ts";
 
-export function parseFunctions(ast: AstValues): Blissfile {
+export function parseFunctions(ast: AstValues): Blissfile[] {
   const { sourceFile } = ast;
   if (!sourceFile) return [];
 
   const blissfile: Blissfile = [];
+  const blissfile: Blissfile[] = [];
   ts.forEachChild(sourceFile, (node) => {
     if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node)) {
       const isDefault =
@@ -19,7 +20,7 @@ export function parseFunctions(ast: AstValues): Blissfile {
         let type;
         if (typeNode) {
           if (ts.isTypeReferenceNode(typeNode)) {
-            type = typeNode.members
+            type = typeNode.typeName.getText();
               .map((member) => {
                 const memberName = member.name?.getText();
                 const memberType = ts.isPropertySignature(member) && member.type ? member.type.getText() : "any";
@@ -42,7 +43,6 @@ export function parseFunctions(ast: AstValues): Blissfile {
         return {
           name: parameter.name.getText(),
           required: !parameter.questionToken,
-          type: { type, required: !parameter.questionToken },
           type,
         };
       });
@@ -67,7 +67,7 @@ export function parseFunctions(ast: AstValues): Blissfile {
           let type;
           if (typeNode) {
             if (ts.isTypeReferenceNode(typeNode)) {
-              type = typeNode.members
+              type = typeNode.typeName.getText();
                 .map((member) => {
                   const memberName = member.name?.getText();
                   const memberType = member.type?.getText() || "any";
