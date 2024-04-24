@@ -73,7 +73,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       ) {
         parameters = expression.parameters.map((parameter) => {
           const paramName = getParameterName(parameter, sourceFile);
-          const paramType = parameter.type
+          const paramType: string = parameter.type
             ? extractType(parameter.type, typeChecker)
             : "any";
           return {
