@@ -17,11 +17,10 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       const parameters = node.parameters.map((parameter) => {
         const type = parameter.type 
           ? extractType(parameter.type, typeChecker)
-          : { name: "any", required: true };
+          : "any";
         return {
           name: ts.isIdentifier(parameter.name)
-            ? parameter.name.text
-            : "anonymous",
+            ? parameter.name.text : undefined,
           required: !parameter.questionToken,
           type,
         };
@@ -47,11 +46,10 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       parameters = expression.parameters.map((parameter) => {
            const type = parameter.type 
             ? extractType(parameter.type, typeChecker)
-            : { name: "any", required: true };
+            : "any";
           return {
             name: ts.isIdentifier(parameter.name)
-              ? parameter.name.text
-              : "anonymous",
+              ? parameter.name.text : undefined,
             required: !parameter.questionToken,
             type,
           };
@@ -72,9 +70,9 @@ function extractType(typeNode: ts.TypeNode, typeChecker: ts.TypeChecker): any {
   if (ts.isTypeLiteralNode(typeNode)) {
     const properties = typeNode.members.map((member) => {
       if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
-        const type = member.type
-          ? typeChecker.typeToString(typeChecker.getTypeFromTypeNode(member.type))
-          : "any";
+        const type = member.type ? typeChecker.getTypeFromTypeNode(member.type) : "any";
+        const typeName = typeChecker.typeToString(type);
+        return { name: member.name.text, required: !member.questionToken, type: typeName };
         return { name: member.name.text, required: !member.questionToken, type };
       }
     });
@@ -82,8 +80,8 @@ function extractType(typeNode: ts.TypeNode, typeChecker: ts.TypeChecker): any {
     properties.forEach((prop) => {
       if (prop) typeObject[prop.name] = { required: prop.required, type: prop.type };
     });
-    return typeObject;
+    return { name: typeObject, required: true };
   } else {
-    return { name: typeChecker.typeToString(typeChecker.getTypeFromTypeNode(typeNode)), required: true };
+    return typeChecker.typeToString(typeChecker.getTypeFromTypeNode(typeNode));
   }
 }
