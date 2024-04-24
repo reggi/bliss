@@ -75,8 +75,15 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
   return functionDefs;
 }
 function getTypeFromTypeNode(typeNode: ts.TypeNode): any {
+  interface MemberShape {
+    [key: string]: {
+      required: boolean;
+      type: any;
+    };
+  }
+
   if (ts.isTypeLiteralNode(typeNode)) {
-    const members = {};
+    const members: MemberShape = {};
     typeNode.members.forEach(member => {
       if (ts.isPropertySignature(member) && member.type) {
         const memberName = member.name.getText();
