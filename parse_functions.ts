@@ -91,13 +91,6 @@ function extractType(
       typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
     );
   } else if (ts.isTypeLiteralNode(typeNode)) {
-    const properties = typeNode.members.flatMap((member) => {
-      if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
-        const type = member.type
-          ? typeChecker.typeToString(typeChecker.getTypeFromTypeNode(member.type))
-          : "any";
-        const memberName = member.name.text;
-        const optional = member.questionToken ? "?" : "";
     const properties: { [key: string]: TypeDef } = {};
     typeNode.members.forEach((member) => {
       if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
@@ -110,7 +103,6 @@ function extractType(
       }
     });
     return properties;
-    });
     return properties;
   }
   return "any";
