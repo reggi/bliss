@@ -99,12 +99,4 @@ function getTypeFromTypeNode(typeNode: ts.TypeNode): any {
     return members;
   } else if (ts.isTypeReferenceNode(typeNode)) {
     return { name: typeNode.typeName.getText() };
-function getTypeFromTypeNode(typeNode: ts.TypeNode): any {
-  // ... existing code ...
-  } else if (ts.isKeywordTypeNode(typeNode) && typeNode.kind === ts.SyntaxKind.AnyKeyword) {
-    return 'any';
-  } else {
-    return typeNode.getText();
-  }
-}
 
