@@ -108,7 +108,8 @@ function extractType(
         const optional = member.questionToken ? false : true;
         properties[memberName] = { required: optional, type: type };
       }
-      return [];
+    });
+    return properties;
     });
     return properties;
   }
