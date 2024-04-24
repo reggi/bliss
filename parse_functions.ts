@@ -37,8 +37,9 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
       // Correct the structure of the object being pushed to blissfile
       // Push the function definition to the blissfile array
       functionDefs.push({
+        type: 'function',
         isDefault,
-        name,
+        name: name || '',
         parameters,
       });
     } else if (ts.isExportAssignment(node)) {
@@ -73,8 +74,9 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
       }
       // Push the function definition to the blissfile array
       functionDefs.push({
+        type: 'function',
         isDefault: defaultExport,
-        name,
+        name: name || '',
         parameters,
       });
     }
