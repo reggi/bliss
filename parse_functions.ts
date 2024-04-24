@@ -37,22 +37,13 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
           (modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword
         ) ?? false;
       const functionName = node.name?.text || (isDefault ? undefined : "");
-      const parameters = node.parameters.map((parameter) => {
+      const parameters = node.parameters.map((parameter): ParamDef => {
         let type: string | { [key: string]: TypeDef } = "any";
         if (parameter.type) {
           const extractedType = extractType(parameter.type, typeChecker);
           type = extractedType;
         }
-        const paramName =
-          parameter.name && ts.isIdentifier(parameter.name)
-            ? parameter.name.text
-            : "";
-        if (!ts.isIdentifier(parameter.name)) {
-          throw new Error(
-            "Parameter name is not an identifier: " +
-              ts.SyntaxKind[parameter.name.kind]
-          );
-        }
+        const paramName = getParameterName(parameter);
         const paramType = type;
         return {
           name: paramName,
@@ -70,6 +61,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         parameters,
       });
     } else if (ts.isExportAssignment(node)) {
+      // ... rest of the code for handling export assignments remains unchanged ...
       // Handle default export of an arrow function
       const defaultExport = true;
       const exportName = undefined;
@@ -105,10 +97,21 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
 
   return functionDefs;
 }
+function getParameterName(parameter: ts.ParameterDeclaration): string {
+  if (ts.isIdentifier(parameter.name)) {
+    return parameter.name.text;
+  } else if (ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)) {
+    // For object or array binding patterns, return a stringified version of the pattern
+    return ts.createPrinter().printNode(ts.EmitHint.Unspecified, parameter.name, sourceFile);
+  }
+  // If the parameter name is not an identifier or a binding pattern, return an empty string
+  return "";
+}
 function extractType(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker
 ): string | { [key: string]: TypeDef } {
+  // ... rest of the extractType function remains unchanged ...
   if (ts.isTypeReferenceNode(typeNode) || ts.isToken(typeNode) && ts.SyntaxKind[typeNode.kind].endsWith('Keyword')) {
     return typeChecker.typeToString(
       typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
