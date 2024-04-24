@@ -83,16 +83,17 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
           };
         });
       }
-    }
-  });
-
-  return functionDefs;
-  // Push the function definition to the functionDefs array
+      // Push the function definition to the functionDefs array
       functionDefs.push({
         default: defaultExport,
         name: exportName,
         parameters,
       });
+    }
+  });
+
+  return functionDefs;
+}
 }
 function getParameterName(parameter: ts.ParameterDeclaration, sourceFile: ts.SourceFile): string {
   if (ts.isIdentifier(parameter.name)) {
