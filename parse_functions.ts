@@ -82,4 +82,5 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
   });
 
   return functionDefs;
+  return functionDefs;
 }
