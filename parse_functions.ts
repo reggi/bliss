@@ -43,7 +43,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
           const extractedType = extractType(parameter.type, typeChecker);
           type = extractedType;
         }
-        const paramName = getParameterName(parameter, sourceFile);
+        const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : undefined;
         const paramType = type;
         return {
           name: paramName,
@@ -71,7 +71,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         ts.isFunctionExpression(expression)
       ) {
         parameters = expression.parameters.map((parameter): ParamDef => {
-          const paramName = getParameterName(parameter, sourceFile);
+          const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : undefined;
           const paramType: TypeDef['type'] = parameter.type
             ? extractType(parameter.type, typeChecker)
             : "any";
@@ -96,7 +96,8 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
 }
 function getParameterName(parameter: ts.ParameterDeclaration, sourceFile: ts.SourceFile): string {
   // If the parameter name is not an identifier, return an empty string
-  return ts.isIdentifier(parameter.name) ? parameter.name.text : '';
+  // This function is no longer needed as the logic has been moved inline
+  // Remove this function
 }
 function extractType(
   typeNode: ts.TypeNode,
