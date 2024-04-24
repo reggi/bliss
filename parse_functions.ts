@@ -14,10 +14,9 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       const name =
         node.name && ts.isIdentifier(node.name) ? node.name.text : undefined;
       const parameters = node.parameters.map((parameter) => {
-        const typeNode = parameter.type;
-        const type = typeNode
-          ? typeChecker.typeToString(typeChecker.getTypeFromTypeNode(typeNode))
-          : "any";
+        const type = parameter.type
+          ? extractType(parameter.type)
+          : { name: "any", required: true };
         return {
           name: ts.isIdentifier(parameter.name)
             ? parameter.name.text
@@ -45,11 +44,15 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         ts.isFunctionExpression(expression)
       ) {
         parameters = expression.parameters.map((parameter) => {
+     let parameters: FunctionDef["parameters"] = [];
+     if (
+       ts.isArrowFunction(expression) ||
+       ts.isFunctionExpression(expression)
+     ) {
+       parameters = expression.parameters.map((parameter) => {
           const type = parameter.type
-            ? typeChecker.typeToString(
-                typeChecker.getTypeFromTypeNode(parameter.type)
-              )
-            : "any";
+            ? extractType(parameter.type)
+            : { name: "any", required: true };
           return {
             name: ts.isIdentifier(parameter.name)
               ? parameter.name.text
@@ -69,4 +72,23 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
   });
 
   return functionDefs;
+}
+function extractType(typeNode: ts.TypeNode): any {
+  if (ts.isTypeLiteralNode(typeNode)) {
+    const properties = typeNode.members.map((member) => {
+      if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
+        return {
+          name: member.name.text,
+          required: !member.questionToken,
+          type: typeChecker.typeToString(typeChecker.getTypeFromTypeNode(member.type)),
+        };
+      }
+    });
+    return properties.reduce((acc, prop) => {
+      if (prop) acc[prop.name] = { required: prop.required, type: prop.type };
+      return acc;
+    }, {});
+  } else {
+    return typeChecker.typeToString(typeChecker.getTypeFromTypeNode(typeNode));
+  }
 }
