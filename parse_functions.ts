@@ -126,7 +126,7 @@ function extractType(
           : "any";
         const memberName = member.name.text;
         const required = !member.questionToken;
-        properties[memberName] = { required: optional, type: type };
+        properties[memberName] = { required: required, type: type };
       }
     });
     return properties;
