@@ -44,9 +44,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         ts.isFunctionExpression(expression)
       ) {
       parameters = expression.parameters.map((parameter) => {
-       parameters = expression.parameters.map((parameter) => {
-      parameters = expression.parameters.map((parameter) => {
-          const type = parameter.type
+           const type = parameter.type
             ? extractType(parameter.type)
             : { name: "any", required: true };
           return {
