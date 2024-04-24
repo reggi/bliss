@@ -43,7 +43,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
           const extractedType = extractType(parameter.type, typeChecker);
           type = extractedType;
         }
-        const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : undefined;
+        const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : "unnamedParam";
         const paramType = type;
         return {
           name: paramName,
