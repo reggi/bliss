@@ -2,6 +2,7 @@ import ts from "npm:typescript";
 import { AstValues, FunctionDef } from "./types.ts";
 
 export function parseFunctions(ast: AstValues, push: (comment: string, source: string, expected: any) => void): FunctionDef[] {
+export function parseFunctions(ast: AstValues, push: (comment: string, source: string, expected: any) => void = () => {}): FunctionDef[] {
   const { sourceFile, typeChecker } = ast;
   if (!sourceFile) return [];
   const functionDefs: FunctionDef[] = [];
@@ -17,9 +18,12 @@ export function parseFunctions(ast: AstValues, push: (comment: string, source: s
         const type = parameter.type 
           ? extractType(parameter.type, typeChecker)
           : "any";
+        const paramName = ts.isIdentifier(parameter.name) ? parameter.name.text : '';
+        if (!paramName) {
+          throw new Error('Parameter name is not an identifier.');
+        }
         return {
-          name: ts.isIdentifier(parameter.name)
-            ? parameter.name.text : undefined,
+          name: paramName,
           required: !parameter.questionToken,
           type,
         };
@@ -68,12 +72,12 @@ function extractType(typeNode: ts.TypeNode, typeChecker: ts.TypeChecker): string
     const properties = typeNode.members.map((member) => {
       if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
         const type = member.type ? typeChecker.getTypeFromTypeNode(member.type) : "any";
-        if (!ts.isIdentifier(member.name)) {
+        const typeName = typeChecker.typeToString(type as ts.Type);
+        const memberName = member.name && ts.isIdentifier(member.name) ? member.name.text : '';
+        if (!memberName) {
           throw new Error('Member name is not an identifier.');
         }
-        const typeName = typeChecker.typeToString(type as ts.Type);
-        return { name: member.name.text, required: !member.questionToken, type: typeName };
-        return { name: member.name.text, required: !member.questionToken, type };
+        return { name: memberName, required: !member.questionToken, type: typeName };
       }
     });
     const typeObject: Record<string, { required: boolean; type: any }> = {};
@@ -84,5 +88,7 @@ function extractType(typeNode: ts.TypeNode, typeChecker: ts.TypeChecker): string
   } else if (ts.isTypeReferenceNode(typeNode)) {
     return typeChecker.typeToString(typeChecker.getTypeFromTypeNode(typeNode) as ts.Type);
   }
-  return 'any';
+  // Convert the typeObject to a string representation of the type
+  const typeEntries = Object.entries(typeObject).map(([key, value]) => `${key}: ${value.type}`);
+  return `{ ${typeEntries.join(', ')} }`;
 }
