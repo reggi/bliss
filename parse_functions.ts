@@ -11,7 +11,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         node.modifiers?.some(
           (modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword
         ) ?? false;
-      const name = node.name?.text || (ts.isIdentifier(node.name) ? node.name.text : undefined);
+      const name = node.name && ts.isIdentifier(node.name) ? node.name.text : undefined;
       const parameters = node.parameters.map((parameter) => {
         const typeNode = parameter.type;
         let type;
@@ -22,7 +22,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         }
         if (ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)) {
           return {
-            name: undefined, // Object and array patterns don't have a single name
+            name: 'pattern', // Use 'pattern' as a placeholder name for binding patterns
             required: !parameter.questionToken,
             type: type === "any" ? "object" : type, // If type is any, it's likely an object pattern
           };
@@ -55,7 +55,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         parameters = expression.parameters.map((parameter) =>
           ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)
             ? {
-                name: undefined, // Object and array patterns don't have a single name
+                name: 'pattern', // Use 'pattern' as a placeholder name for binding patterns
                 required: !parameter.questionToken,
                 type: "object", // Assume object type for binding patterns
               }
@@ -99,6 +99,10 @@ function getTypeFromTypeNode(typeNode: ts.TypeNode): any {
     return members;
   } else if (ts.isTypeReferenceNode(typeNode)) {
     return { name: typeNode.typeName.getText() };
+function getTypeFromTypeNode(typeNode: ts.TypeNode): any {
+  // ... existing code ...
+  } else if (ts.isKeywordTypeNode(typeNode) && typeNode.kind === ts.SyntaxKind.AnyKeyword) {
+    return 'any';
   } else {
     return typeNode.getText();
   }
