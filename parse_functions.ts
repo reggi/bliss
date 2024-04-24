@@ -94,7 +94,6 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
 
   return functionDefs;
 }
-}
 function getParameterName(parameter: ts.ParameterDeclaration, sourceFile: ts.SourceFile): string {
   if (ts.isIdentifier(parameter.name)) {
     return parameter.name.text;
