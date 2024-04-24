@@ -6,6 +6,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
   if (!sourceFile) return [];
   const functionDefs: FunctionDef[] = [];
   ts.forEachChild(sourceFile, (node) => {
+    // ... rest of the code remains unchanged ...
     if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node)) {
       const isDefault =
         node.modifiers?.some(
@@ -67,22 +68,22 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
 
   return functionDefs;
 }
-function extractType(typeNode: ts.TypeNode): any {
+function extractType(typeNode: ts.TypeNode, typeChecker: ts.TypeChecker): any {
   if (ts.isTypeLiteralNode(typeNode)) {
     const properties = typeNode.members.map((member) => {
       if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
-        return {
-          name: member.name.text,
-          required: !member.questionToken,
-          type: typeChecker.typeToString(typeChecker.getTypeFromTypeNode(member.type)),
-        };
+        const type = member.type
+          ? typeChecker.typeToString(typeChecker.getTypeFromTypeNode(member.type))
+          : "any";
+        return { name: member.name.text, required: !member.questionToken, type };
       }
     });
-    return properties.reduce((acc, prop) => {
-      if (prop) acc[prop.name] = { required: prop.required, type: prop.type };
-      return acc;
-    }, {});
+    const typeObject: Record<string, { required: boolean; type: string }> = {};
+    properties.forEach((prop) => {
+      if (prop) typeObject[prop.name] = { required: prop.required, type: prop.type };
+    });
+    return typeObject;
   } else {
-    return typeChecker.typeToString(typeChecker.getTypeFromTypeNode(typeNode));
+    return { name: typeChecker.typeToString(typeChecker.getTypeFromTypeNode(typeNode)), required: true };
   }
 }
