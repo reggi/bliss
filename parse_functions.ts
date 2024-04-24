@@ -18,13 +18,13 @@ export function parseFunctions(ast: AstValues): Blissfile {
       }));
 
       blissfile.push({
-        isDefault,
+        default: isDefault,
         name,
         parameters
       });
     } else if (ts.isExportAssignment(node)) {
       // Handle default export of an arrow function
-      const isDefault = true;
+      const defaultExport = true;
       const name = undefined;
       const expression = node.expression;
       let parameters = [];
@@ -36,7 +36,7 @@ export function parseFunctions(ast: AstValues): Blissfile {
         }));
       }
       blissfile.push({
-        isDefault,
+        default: defaultExport,
         name,
         parameters
       });
