@@ -91,41 +91,18 @@ function extractType(
       typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
     );
   } else if (ts.isTypeLiteralNode(typeNode)) {
-    const properties = typeNode.members
-      .map((member) => {
-        if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
-          const type = member.type
-            ? typeChecker.getTypeFromTypeNode(member.type)
-            : "any";
-          const typeName = typeChecker.typeToString(type as ts.Type);
-          const memberName =
-            member.name && ts.isIdentifier(member.name) ? member.name.text : "";
-          if (!memberName) {
-            throw new Error("Member name is not an identifier.");
-          }
-          return memberName
-            ? {
-                name: memberName,
-                required: !member.questionToken,
-                type: typeName,
-              }
-            : undefined;
-        }
-        return undefined;
-      })
-      .filter(
-        (p): p is { name: string; required: boolean; type: string } =>
-          p !== null
-      );
-    return properties.length > 0
-      ? properties.reduce(
-          (acc, p) => ({
-            ...acc,
-            [p.name]: { type: p.type, required: p.required },
-          }),
-          {}
-        )
-      : "any";
+    const properties = typeNode.members.flatMap((member) => {
+      if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
+        const type = member.type
+          ? typeChecker.typeToString(typeChecker.getTypeFromTypeNode(member.type))
+          : "any";
+        const memberName = member.name.text;
+        const optional = member.questionToken ? "?" : "";
+        return `${memberName}${optional}: ${type}`;
+      }
+      return [];
+    });
+    return `{ ${properties.join("; ")} }`;
   }
   return "any";
 }
