@@ -43,7 +43,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
           const extractedType = extractType(parameter.type, typeChecker);
           type = extractedType;
         }
-        const paramName = getParameterName(parameter);
+        const paramName = getParameterName(parameter, sourceFile);
         const paramType = type;
         return {
           name: paramName,
@@ -97,7 +97,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
 
   return functionDefs;
 }
-function getParameterName(parameter: ts.ParameterDeclaration): string {
+function getParameterName(parameter: ts.ParameterDeclaration, sourceFile: ts.SourceFile): string {
   if (ts.isIdentifier(parameter.name)) {
     return parameter.name.text;
   } else if (ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)) {
