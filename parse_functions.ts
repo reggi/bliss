@@ -21,7 +21,10 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
         if (typeNode) {
           if (ts.isTypeReferenceNode(typeNode)) {
             type = typeNode.typeName.getText()
-            .map((member) => {
+            // Assuming the intent was to process members of a type literal or interface
+            // This part of the code needs to be revised to correctly handle type nodes
+            // For now, removing the incorrect map and reduce calls
+            // .map((member) => {
                 const memberName = member.name?.getText();
                 const memberType = ts.isPropertySignature(member) && member.type ? member.type.getText() : "any";
                 const memberRequired = !member.questionToken;
@@ -33,7 +36,7 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
                   return {};
                 }
               })
-              .reduce((acc, curr) => ({ ...acc, ...curr }), {});
+            // .reduce((acc, curr) => ({ ...acc, ...curr }), {});
           } else {
             type = typeNode.getText();
           }
@@ -47,8 +50,10 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
         };
       });
 
+      // Correct the structure of the object being pushed to blissfile
+      // Correct the structure of the object being pushed to blissfile
       blissfile.push({
-        default: isDefault,
+        isDefault,
         name,
         parameters,
       });
@@ -68,7 +73,10 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
           if (typeNode) {
             if (ts.isTypeReferenceNode(typeNode)) {
               type = typeNode.typeName.getText()
-              .map((member) => {
+              // Assuming the intent was to process members of a type literal or interface
+            // This part of the code needs to be revised to correctly handle type nodes
+            // For now, removing the incorrect map and reduce calls
+            // .map((member) => {
                   const memberName = member.name?.getText();
                   const memberType = member.type?.getText() || "any";
                   const memberRequired = !member.questionToken;
@@ -79,7 +87,7 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
                     },
                   };
                 })
-                .reduce((acc, curr) => ({ ...acc, ...curr }), {});
+              // .reduce((acc, curr) => ({ ...acc, ...curr }), {});
             } else {
               type = typeNode.getText();
             }
@@ -93,8 +101,9 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
           };
         });
       }
+      // Correct the structure of the object being pushed to blissfile
       blissfile.push({
-        default: defaultExport,
+        isDefault: defaultExport,
         name,
         parameters,
       });
