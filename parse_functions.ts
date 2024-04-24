@@ -108,7 +108,6 @@ function extractType(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker
 ): TypeDef['type'] {
-): TypeDef['type'] {
   // ... rest of the extractType function remains unchanged ...
   if (ts.isTypeReferenceNode(typeNode) || ts.isToken(typeNode) && ts.SyntaxKind[typeNode.kind].endsWith('Keyword')) {
     return typeChecker.typeToString(
@@ -127,7 +126,6 @@ function extractType(
           : "any";
         const memberName = member.name.text;
         const required = !member.questionToken;
-        properties[memberName] = { required: required, type: type };
         properties[memberName] = { required: optional, type: type };
       }
     });
