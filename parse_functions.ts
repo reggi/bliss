@@ -71,17 +71,15 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         ts.isArrowFunction(expression) ||
         ts.isFunctionExpression(expression)
       ) {
-        parameters = expression.parameters.map((parameter): { name: string; required: boolean; type: string } => {
-          const type = parameter.type
-            ? extractType(parameter.type, typeChecker) as string
+        parameters = expression.parameters.map((parameter) => {
+          const paramName = getParameterName(parameter, sourceFile);
+          const paramType = parameter.type
+            ? extractType(parameter.type, typeChecker)
             : "any";
-          if (!ts.isIdentifier(parameter.name)) {
-            throw new Error("Parameter name is not an identifier.");
-          }
           return {
-            name: parameter.name.text,
+            name: paramName,
             required: !parameter.questionToken,
-            type,
+            type: paramType,
           };
         });
       }
