@@ -74,6 +74,7 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
       }
       // Push the function definition to the blissfile array
       functionDefs.push({
+      functionDefs.push({
         isDefault: defaultExport,
         name,
         parameters,
@@ -81,6 +82,7 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
     }
   });
 
+  return functionDefs;
   return functionDefs;
   return functionDefs;
 }
