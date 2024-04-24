@@ -71,6 +71,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         ts.isFunctionExpression(expression)
       ) {
         parameters = expression.parameters.map((parameter): ParamDef => {
+            const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : "unnamedParam";
             const paramType: TypeDef['type'] = parameter.type
             ? extractType(parameter.type, typeChecker)
             : "any";
