@@ -43,7 +43,6 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         ts.isArrowFunction(expression) ||
         ts.isFunctionExpression(expression)
       ) {
-        parameters = expression.parameters.map((parameter) => {
      let parameters: FunctionDef["parameters"] = [];
      if (
        ts.isArrowFunction(expression) ||
