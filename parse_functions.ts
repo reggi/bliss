@@ -23,8 +23,8 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
           parameter.name && ts.isIdentifier(parameter.name)
             ? parameter.name.text
             : "";
-        if (paramName === "") {
-          throw new Error("Parameter name is not an identifier.");
+        if (!ts.isIdentifier(parameter.name)) {
+          throw new Error("Parameter name is not an identifier: " + ts.SyntaxKind[parameter.name.kind]);
         }
         const paramType = type;
         return {
@@ -82,7 +82,8 @@ function extractType(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker
 ): string {
-  if (ts.isTypeReferenceNode(typeNode)) {
+): string | { [key: string]: TypeDef } {
+  if (ts.isTypeReferenceNode(typeNode) || ts.isStringKeyword(typeNode)) {
     return typeChecker.typeToString(
       typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
     );
@@ -98,11 +99,19 @@ function extractType(
           : "any";
         const memberName = member.name.text;
         const optional = member.questionToken ? "?" : "";
-        return `${memberName}${optional}: ${type}`;
+    const properties: { [key: string]: TypeDef } = {};
+    typeNode.members.forEach((member) => {
+      if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
+        const type = member.type
+          ? extractType(member.type, typeChecker)
+          : "any";
+        const memberName = member.name.text;
+        const optional = member.questionToken ? false : true;
+        properties[memberName] = { required: optional, type: type };
       }
       return [];
     });
-    return `{ ${properties.join("; ")} }`;
+    return properties;
   }
   return "any";
 }
