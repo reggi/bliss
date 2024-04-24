@@ -62,19 +62,15 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         parameters,
       });
     } else if (ts.isExportAssignment(node)) {
-      // ... rest of the code for handling export assignments remains unchanged ...
-      // Handle default export of an arrow function
       const defaultExport = true;
       const exportName = undefined;
       const expression = node.expression;
       let parameters: ParamDef[] = [];
-      let parameters: { name: string; required: boolean; type: string }[] = [];
       if (
         ts.isArrowFunction(expression) ||
         ts.isFunctionExpression(expression)
       ) {
         parameters = expression.parameters.map((parameter): ParamDef => {
-        parameters = expression.parameters.map((parameter) => {
           const paramName = getParameterName(parameter, sourceFile);
           const paramType: string | { [key: string]: TypeDef } = parameter.type
             ? extractType(parameter.type, typeChecker)
@@ -87,22 +83,16 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
           };
         });
       }
-      // ... rest of the code remains unchanged ...
     }
   });
 
   return functionDefs;
-      // Push the function definition to the blissfile array
-      // Push the function definition to the functionDefs array
+  // Push the function definition to the functionDefs array
       functionDefs.push({
         default: defaultExport,
         name: exportName,
         parameters,
       });
-    }
-  });
-
-  return functionDefs;
 }
 function getParameterName(parameter: ts.ParameterDeclaration, sourceFile: ts.SourceFile): string {
   if (ts.isIdentifier(parameter.name)) {
