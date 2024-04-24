@@ -18,15 +18,19 @@ export function parseFunctions(ast: AstValues): Blissfile {
         const typeNode = parameter.type;
         let type;
         if (typeNode) {
-          if (ts.isTypeLiteralNode(typeNode)) {
+          if (ts.isTypeReferenceNode(typeNode)) {
             type = typeNode.members
               .map((member) => {
                 const memberName = member.name?.getText();
-                const memberType = member.type?.getText() || "any";
+                const memberType = ts.isPropertySignature(member) && member.type ? member.type.getText() : "any";
                 const memberRequired = !member.questionToken;
-                return {
-                  [memberName]: { required: memberRequired, type: memberType },
-                };
+                if (typeof memberName === 'string') {
+                  return {
+                    [memberName]: { required: memberRequired, type: { type: memberType, required: memberRequired } },
+                  };
+                } else {
+                  return {};
+                }
               })
               .reduce((acc, curr) => ({ ...acc, ...curr }), {});
           } else {
@@ -38,6 +42,7 @@ export function parseFunctions(ast: AstValues): Blissfile {
         return {
           name: parameter.name.getText(),
           required: !parameter.questionToken,
+          type: { type, required: !parameter.questionToken },
           type,
         };
       });
@@ -52,7 +57,7 @@ export function parseFunctions(ast: AstValues): Blissfile {
       const defaultExport = true;
       const name = undefined;
       const expression = node.expression;
-      let parameters = [];
+      let parameters: { name: string; required: boolean; type: string | object; }[] = [];
       if (
         ts.isArrowFunction(expression) ||
         ts.isFunctionExpression(expression)
@@ -61,7 +66,7 @@ export function parseFunctions(ast: AstValues): Blissfile {
           const typeNode = parameter.type;
           let type;
           if (typeNode) {
-            if (ts.isTypeLiteralNode(typeNode)) {
+            if (ts.isTypeReferenceNode(typeNode)) {
               type = typeNode.members
                 .map((member) => {
                   const memberName = member.name?.getText();
