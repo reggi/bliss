@@ -109,7 +109,7 @@ function extractType(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker
 ): string | { [key: string]: TypeDef } {
-  if (ts.isTypeReferenceNode(typeNode) || (ts.isKeywordTypeNode && ts.isKeywordTypeNode(typeNode)) || typeNode.kind === ts.SyntaxKind.StringKeyword) {
+  if (ts.isTypeReferenceNode(typeNode) || ts.isKeywordTypeNode(typeNode)) {
     return typeChecker.typeToString(
       typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
     );
