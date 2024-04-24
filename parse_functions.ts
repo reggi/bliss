@@ -41,7 +41,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         let type: string | { [key: string]: TypeDef } = "any";
         if (parameter.type) {
           const extractedType = extractType(parameter.type, typeChecker);
-          type = extractedType;
+          type = typeof extractedType === 'string' ? extractedType : JSON.stringify(extractedType);
         }
         const paramName = getParameterName(parameter, sourceFile);
         const paramType = type;
@@ -51,6 +51,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
           type: paramType,
         };
       });
+      // ... rest of the code remains unchanged ...
 
       // Push the function definition to the functionDefs array
       // Correct the structure of the object being pushed to blissfile
@@ -66,23 +67,31 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       const defaultExport = true;
       const exportName = undefined;
       const expression = node.expression;
+      let parameters: ParamDef[] = [];
       let parameters: { name: string; required: boolean; type: string }[] = [];
       if (
         ts.isArrowFunction(expression) ||
         ts.isFunctionExpression(expression)
       ) {
+        parameters = expression.parameters.map((parameter): ParamDef => {
         parameters = expression.parameters.map((parameter) => {
           const paramName = getParameterName(parameter, sourceFile);
           const paramType: string | { [key: string]: TypeDef } = parameter.type
             ? extractType(parameter.type, typeChecker)
             : "any";
+          const typeString = typeof paramType === 'string' ? paramType : JSON.stringify(paramType);
           return {
             name: paramName,
             required: !parameter.questionToken,
-            type: paramType,
+            type: typeString,
           };
         });
       }
+      // ... rest of the code remains unchanged ...
+    }
+  });
+
+  return functionDefs;
       // Push the function definition to the blissfile array
       // Push the function definition to the functionDefs array
       functionDefs.push({
