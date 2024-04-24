@@ -8,12 +8,8 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
   ts.forEachChild(sourceFile, (node) => {
     // ... rest of the code remains unchanged ...
     if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node)) {
-      const isDefault =
-        node.modifiers?.some(
-          (modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword
-        ) ?? false;
-      const name = node.name?.text || "";
-      const name = node.name?.text || (isDefault ? undefined : "");
+      const isDefault = node.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.DefaultKeyword) ?? false;
+      const functionName = node.name?.text || (isDefault ? undefined : "");
       const parameters = node.parameters.map((parameter) => {
         const type = parameter.type
           ? extractType(parameter.type, typeChecker)
@@ -36,14 +32,13 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       // Push the function definition to the blissfile array
       functionDefs.push({
         default: isDefault,
-        name: isDefault ? undefined : name,
+        name: functionName,
         parameters,
       });
     } else if (ts.isExportAssignment(node)) {
       // Handle default export of an arrow function
       const defaultExport = true;
-      const name = "default";
-      const name = undefined;
+      const exportName = undefined;
       const expression = node.expression;
       let parameters: { name: string; required: boolean; type: string }[] = [];
       if (
@@ -68,7 +63,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       // Push the function definition to the functionDefs array
       functionDefs.push({
         default: defaultExport,
-        name: name,
+        name: exportName,
         parameters,
       });
     }
@@ -97,11 +92,11 @@ function extractType(
         if (!memberName) {
           throw new Error("Member name is not an identifier.");
         }
-        return typeName;
+        return `${memberName}: ${typeName}`;
       }
-      return '';
+      return null;
     }).filter(Boolean).join(", ");
-    return properties.length > 0 ? `{ ${properties.join(', ')} }` : "any";
+    return properties.length > 0 ? `{ ${properties} }` : "any";
   }
   return "any";
 }
