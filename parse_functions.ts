@@ -5,8 +5,7 @@ import { createAstFromSource } from "./test_source.ts";
 export function parseFunctions(ast: AstValues): Blissfile[] {
   const { sourceFile } = ast;
   if (!sourceFile) return [];
-  let blissfile: Blissfile[] = [];
-  const blissfile: Blissfile[] = [];
+  let functionDefs: Blissfile[] = [];
   ts.forEachChild(sourceFile, (node) => {
     if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node)) {
       const isDefault =
@@ -74,7 +73,6 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
       }
       // Push the function definition to the blissfile array
       functionDefs.push({
-      functionDefs.push({
         isDefault: defaultExport,
         name,
         parameters,
@@ -82,7 +80,5 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
     }
   });
 
-  return functionDefs;
-  return functionDefs;
   return functionDefs;
 }
