@@ -16,13 +16,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         const typeNode = parameter.type;
         let type;
         if (typeNode) {
-          if (ts.isTypeReferenceNode(typeNode)) {
-            type = typeNode.typeName.getText();
-            // Assuming the intent was to process members of a type literal or interface
-            // The code to process type nodes should be implemented here
-          } else {
-            type = typeNode.getText();
-          }
+          type = getTypeFromTypeNode(typeNode);
         } else {
           type = "any";
         }
@@ -58,12 +52,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
           const typeNode = parameter.type;
           let type: string;
           if (typeNode) {
-            if (ts.isTypeReferenceNode(typeNode)) {
-              type = typeNode.typeName.getText();
-              // The code to process type nodes should be implemented here
-            } else {
-              type = typeNode.getText();
-            }
+            type = getTypeFromTypeNode(typeNode);
           } else {
             type = "any";
           }
@@ -85,3 +74,22 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
 
   return functionDefs;
 }
+function getTypeFromTypeNode(typeNode: ts.TypeNode): any {
+  if (ts.isTypeLiteralNode(typeNode)) {
+    const members = typeNode.members.map(member => {
+      if (ts.isPropertySignature(member) && member.type) {
+        return {
+          name: member.name.getText(),
+          required: !member.questionToken,
+          type: getTypeFromTypeNode(member.type),
+        };
+      }
+    }).filter(Boolean);
+    return members;
+  } else if (ts.isTypeReferenceNode(typeNode)) {
+    return { name: typeNode.typeName.getText() };
+  } else {
+    return typeNode.getText();
+  }
+}
+
