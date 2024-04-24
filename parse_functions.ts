@@ -6,7 +6,7 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
   const { sourceFile } = ast;
   if (!sourceFile) return [];
 
-  const blissfile: Blissfile = [];
+  const blissfile: Blissfile[] = [];
   const blissfile: Blissfile[] = [];
   ts.forEachChild(sourceFile, (node) => {
     if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node)) {
@@ -20,8 +20,8 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
         let type;
         if (typeNode) {
           if (ts.isTypeReferenceNode(typeNode)) {
-            type = typeNode.typeName.getText();
-              .map((member) => {
+            type = typeNode.typeName.getText()
+            .map((member) => {
                 const memberName = member.name?.getText();
                 const memberType = ts.isPropertySignature(member) && member.type ? member.type.getText() : "any";
                 const memberRequired = !member.questionToken;
@@ -67,8 +67,8 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
           let type;
           if (typeNode) {
             if (ts.isTypeReferenceNode(typeNode)) {
-              type = typeNode.typeName.getText();
-                .map((member) => {
+              type = typeNode.typeName.getText()
+              .map((member) => {
                   const memberName = member.name?.getText();
                   const memberType = member.type?.getText() || "any";
                   const memberRequired = !member.questionToken;
