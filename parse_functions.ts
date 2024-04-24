@@ -37,6 +37,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
           (modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword
         ) ?? false;
       const functionName = node.name?.text || (isDefault ? undefined : "");
+      // ... rest of the code remains unchanged ...
       const parameters = node.parameters.map((parameter): ParamDef => {
         let type: TypeDef['type'];
         if (parameter.type) {
@@ -45,7 +46,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         } else {
           type = "any";
         }
-        const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : "unnamedParam";
+        const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : undefined;
         const paramType = type;
         return {
           name: paramName,
@@ -53,6 +54,8 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
           type: paramType,
         };
       });
+      // ... rest of the code remains unchanged ...
+    } else if (ts.isExportAssignment(node)) {
       // ... rest of the code remains unchanged ...
 
       // Push the function definition to the functionDefs array
@@ -74,6 +77,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       ) {
         parameters = expression.parameters.map((parameter): ParamDef => {
             const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : "unnamedParam";
+            const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : undefined;
             let paramType: TypeDef['type'];
             if (parameter.type) {
               paramType = extractType(parameter.type, typeChecker);
@@ -88,6 +92,11 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
           };
         });
       }
+      // ... rest of the code remains unchanged ...
+    }
+  });
+
+  return functionDefs;
       // Push the function definition to the functionDefs array
       functionDefs.push({
         default: defaultExport,
@@ -103,12 +112,56 @@ function extractType(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker
 ): TypeDef['type'] {
-  // ... rest of the extractType function remains unchanged ...
+  if (ts.isTypeReferenceNode(typeNode) || ts.isToken(typeNode) && ts.SyntaxKind[typeNode.kind].endsWith('Keyword')) {
+    return typeChecker.typeToString(
+      typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
+    );
+  } else if (ts.isLiteralTypeNode(typeNode) && typeNode.literal) {
+    return typeChecker.typeToString(
+      typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
+    );
+  } else if (ts.isTypeLiteralNode(typeNode)) {
+    const properties: { [key: string]: TypeDef } = {};
+    typeNode.members.forEach((member) => {
+      if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
+        const type = member.type
+          ? extractType(member.type, typeChecker)
+          : "any";
+        const memberName = member.name.text;
+        const required = !member.questionToken;
+        properties[memberName] = { required: required, type: type };
+      }
+    });
+    return properties;
+  }
+  return "any";
 function extractType(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker
 ): TypeDef['type'] {
-  // ... rest of the extractType function remains unchanged ...
+  if (ts.isTypeReferenceNode(typeNode) || ts.isToken(typeNode) && ts.SyntaxKind[typeNode.kind].endsWith('Keyword')) {
+    return typeChecker.typeToString(
+      typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
+    );
+  } else if (ts.isLiteralTypeNode(typeNode) && typeNode.literal) {
+    return typeChecker.typeToString(
+      typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
+    );
+  } else if (ts.isTypeLiteralNode(typeNode)) {
+    const properties: { [key: string]: TypeDef } = {};
+    typeNode.members.forEach((member) => {
+      if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
+        const type = member.type
+          ? extractType(member.type, typeChecker)
+          : "any";
+        const memberName = member.name.text;
+        const required = !member.questionToken;
+        properties[memberName] = { required: required, type: type };
+      }
+    });
+    return properties;
+  }
+  return "any";
   if (ts.isTypeReferenceNode(typeNode) || ts.isToken(typeNode) && ts.SyntaxKind[typeNode.kind].endsWith('Keyword')) {
     return typeChecker.typeToString(
       typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
