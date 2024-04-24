@@ -11,11 +11,29 @@ export function parseFunctions(ast: AstValues): Blissfile {
     if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node)) {
       const isDefault = node.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.DefaultKeyword) ?? false;
       const name = node.name?.text;
-      const parameters = node.parameters.map(parameter => ({
-        name: parameter.name.getText(),
-        required: !parameter.questionToken,
-        type: parameter.type ? parameter.type.getText() : 'any'
-      }));
+      const parameters = node.parameters.map(parameter => {
+        const typeNode = parameter.type;
+        let type;
+        if (typeNode) {
+          if (ts.isTypeLiteralNode(typeNode)) {
+            type = typeNode.members.map(member => {
+              const memberName = member.name?.getText();
+              const memberType = member.type?.getText() || 'any';
+              const memberRequired = !member.questionToken;
+              return { [memberName]: { required: memberRequired, type: memberType } };
+            }).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+          } else {
+            type = typeNode.getText();
+          }
+        } else {
+          type = 'any';
+        }
+        return {
+          name: parameter.name.getText(),
+          required: !parameter.questionToken,
+          type
+        };
+      });
 
       blissfile.push({
         default: isDefault,
@@ -29,11 +47,29 @@ export function parseFunctions(ast: AstValues): Blissfile {
       const expression = node.expression;
       let parameters = [];
       if (ts.isArrowFunction(expression) || ts.isFunctionExpression(expression)) {
-        parameters = expression.parameters.map(parameter => ({
-          name: parameter.name.getText(),
-          required: !parameter.questionToken,
-          type: parameter.type ? parameter.type.getText() : 'any'
-        }));
+        parameters = expression.parameters.map(parameter => {
+          const typeNode = parameter.type;
+          let type;
+          if (typeNode) {
+            if (ts.isTypeLiteralNode(typeNode)) {
+              type = typeNode.members.map(member => {
+                const memberName = member.name?.getText();
+                const memberType = member.type?.getText() || 'any';
+                const memberRequired = !member.questionToken;
+                return { [memberName]: { required: memberRequired, type: memberType } };
+              }).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+            } else {
+              type = typeNode.getText();
+            }
+          } else {
+            type = 'any';
+          }
+          return {
+            name: parameter.name.getText(),
+            required: !parameter.questionToken,
+            type
+          };
+        });
       }
       blissfile.push({
         default: defaultExport,
