@@ -13,6 +13,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
           (modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword
         ) ?? false;
       const name = node.name?.text || "";
+      const name = node.name?.text || (isDefault ? undefined : "");
       const parameters = node.parameters.map((parameter) => {
         const type = parameter.type
           ? extractType(parameter.type, typeChecker)
@@ -30,17 +31,19 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         };
       });
 
+      // Push the function definition to the functionDefs array
       // Correct the structure of the object being pushed to blissfile
       // Push the function definition to the blissfile array
       functionDefs.push({
         default: isDefault,
-        name: name,
+        name: isDefault ? undefined : name,
         parameters,
       });
     } else if (ts.isExportAssignment(node)) {
       // Handle default export of an arrow function
       const defaultExport = true;
       const name = "default";
+      const name = undefined;
       const expression = node.expression;
       let parameters: { name: string; required: boolean; type: string }[] = [];
       if (
@@ -62,6 +65,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         });
       }
       // Push the function definition to the blissfile array
+      // Push the function definition to the functionDefs array
       functionDefs.push({
         default: defaultExport,
         name: name,
@@ -93,11 +97,11 @@ function extractType(
         if (!memberName) {
           throw new Error("Member name is not an identifier.");
         }
-        return `${memberName}: ${typeName}`;
+        return typeName;
       }
       return '';
     }).filter(Boolean).join(", ");
-    return `{ ${properties} }`;
+    return properties.length > 0 ? `{ ${properties.join(', ')} }` : "any";
   }
   return "any";
 }
