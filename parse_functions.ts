@@ -62,7 +62,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
             : {
                 name: parameter.name.getText(),
                 required: !parameter.questionToken,
-                type: getTypeFromTypeNode(parameter.type || ts.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)),
+                type: getTypeFromTypeNode(parameter.type || ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)),
               }
         );
       }
@@ -99,4 +99,7 @@ function getTypeFromTypeNode(typeNode: ts.TypeNode): any {
     return members;
   } else if (ts.isTypeReferenceNode(typeNode)) {
     return { name: typeNode.typeName.getText() };
+  }
+  return "any"; // Fallback to "any" if type cannot be determined
+}
 
