@@ -37,7 +37,7 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
 
       // Correct the structure of the object being pushed to blissfile
       // Push the function definition to the blissfile array
-      blissfile.push({
+      functionDefs.push({
         isDefault,
         name,
         parameters,
@@ -73,7 +73,7 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
         });
       }
       // Push the function definition to the blissfile array
-      blissfile.push({
+      functionDefs.push({
         isDefault: defaultExport,
         name,
         parameters,
@@ -81,5 +81,5 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
     }
   });
 
-  return blissfile;
+  return functionDefs;
 }
