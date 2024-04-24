@@ -45,6 +45,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       ) {
       parameters = expression.parameters.map((parameter) => {
        parameters = expression.parameters.map((parameter) => {
+      parameters = expression.parameters.map((parameter) => {
           const type = parameter.type
             ? extractType(parameter.type)
             : { name: "any", required: true };
@@ -55,7 +56,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
             required: !parameter.questionToken,
             type,
           };
-        });
+      });
       }
       // Push the function definition to the blissfile array
       functionDefs.push({
