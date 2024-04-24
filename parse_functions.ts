@@ -21,7 +21,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         return {
           name: ts.isIdentifier(parameter.name)
             ? parameter.name.text
-            : undefined,
+            : "anonymous",
           required: !parameter.questionToken,
           type,
         };
@@ -53,7 +53,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
           return {
             name: ts.isIdentifier(parameter.name)
               ? parameter.name.text
-              : undefined,
+              : "anonymous",
             required: !parameter.questionToken,
             type,
           };
