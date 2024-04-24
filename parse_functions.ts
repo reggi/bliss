@@ -95,11 +95,8 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
   return functionDefs;
 }
 function getParameterName(parameter: ts.ParameterDeclaration, sourceFile: ts.SourceFile): string {
-  if (ts.isIdentifier(parameter.name)) {
-    return parameter.name.text;
-  }
-  // If the parameter name is an object or array binding pattern, or not an identifier, return undefined
-  return undefined;
+  // If the parameter name is not an identifier, return an empty string
+  return ts.isIdentifier(parameter.name) ? parameter.name.text : '';
 }
 function extractType(
   typeNode: ts.TypeNode,
