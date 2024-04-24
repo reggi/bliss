@@ -107,7 +107,7 @@ function getParameterName(parameter: ts.ParameterDeclaration, sourceFile: ts.Sou
 function extractType(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker
-): string | { [key: string]: TypeDef } {
+): TypeDef['type'] {
 ): TypeDef['type'] {
   // ... rest of the extractType function remains unchanged ...
   if (ts.isTypeReferenceNode(typeNode) || ts.isToken(typeNode) && ts.SyntaxKind[typeNode.kind].endsWith('Keyword')) {
