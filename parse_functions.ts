@@ -42,7 +42,6 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         if (parameter.type) {
           const extractedType = extractType(parameter.type, typeChecker);
           type = extractedType;
-        }
         } else {
           type = "any";
         }
