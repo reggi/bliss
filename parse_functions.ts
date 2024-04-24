@@ -5,8 +5,7 @@ import { createAstFromSource } from "./test_source.ts";
 export function parseFunctions(ast: AstValues): Blissfile[] {
   const { sourceFile } = ast;
   if (!sourceFile) return [];
-
-  const blissfile: Blissfile[] = [];
+  let blissfile: Blissfile[] = [];
   const blissfile: Blissfile[] = [];
   ts.forEachChild(sourceFile, (node) => {
     if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node)) {
@@ -22,21 +21,7 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
           if (ts.isTypeReferenceNode(typeNode)) {
             type = typeNode.typeName.getText()
             // Assuming the intent was to process members of a type literal or interface
-            // This part of the code needs to be revised to correctly handle type nodes
-            // For now, removing the incorrect map and reduce calls
-            // .map((member) => {
-                const memberName = member.name?.getText();
-                const memberType = ts.isPropertySignature(member) && member.type ? member.type.getText() : "any";
-                const memberRequired = !member.questionToken;
-                if (typeof memberName === 'string') {
-                  return {
-                    [memberName]: { required: memberRequired, type: { type: memberType, required: memberRequired } },
-                  };
-                } else {
-                  return {};
-                }
-              })
-            // .reduce((acc, curr) => ({ ...acc, ...curr }), {});
+            // The code to process type nodes should be implemented here
           } else {
             type = typeNode.getText();
           }
@@ -51,7 +36,7 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
       });
 
       // Correct the structure of the object being pushed to blissfile
-      // Correct the structure of the object being pushed to blissfile
+      // Push the function definition to the blissfile array
       blissfile.push({
         isDefault,
         name,
@@ -73,21 +58,7 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
           if (typeNode) {
             if (ts.isTypeReferenceNode(typeNode)) {
               type = typeNode.typeName.getText()
-              // Assuming the intent was to process members of a type literal or interface
-            // This part of the code needs to be revised to correctly handle type nodes
-            // For now, removing the incorrect map and reduce calls
-            // .map((member) => {
-                  const memberName = member.name?.getText();
-                  const memberType = member.type?.getText() || "any";
-                  const memberRequired = !member.questionToken;
-                  return {
-                    [memberName]: {
-                      required: memberRequired,
-                      type: memberType,
-                    },
-                  };
-                })
-              // .reduce((acc, curr) => ({ ...acc, ...curr }), {});
+              // The code to process type nodes should be implemented here
             } else {
               type = typeNode.getText();
             }
@@ -101,7 +72,7 @@ export function parseFunctions(ast: AstValues): Blissfile[] {
           };
         });
       }
-      // Correct the structure of the object being pushed to blissfile
+      // Push the function definition to the blissfile array
       blissfile.push({
         isDefault: defaultExport,
         name,
