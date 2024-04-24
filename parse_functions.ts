@@ -71,17 +71,14 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         ts.isFunctionExpression(expression)
       ) {
         parameters = expression.parameters.map((parameter): ParamDef => {
-          const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : "unnamedParam";
-          const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : "unnamedParam";
-          const paramType: TypeDef['type'] = parameter.type
+            const paramType: TypeDef['type'] = parameter.type
             ? extractType(parameter.type, typeChecker)
             : "any";
           const typeString = paramType;
           return {
             name: paramName,
             required: !parameter.questionToken,
-            type: paramType,
-            type: typeString,
+             type: typeString,
           };
         });
       }
@@ -101,11 +98,6 @@ function extractType(
   typeChecker: ts.TypeChecker
 ): TypeDef['type'] {
   // ... rest of the extractType function remains unchanged ...
-function getParameterName(parameter: ts.ParameterDeclaration, sourceFile: ts.SourceFile): string {
-  // If the parameter name is not an identifier, return an empty string
-  // This function is no longer needed as the logic has been moved inline
-  // Remove this function
-}
 function extractType(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker
@@ -133,5 +125,7 @@ function extractType(
     });
     return properties;
   }
+  return "any";
+}
   return "any";
 }
