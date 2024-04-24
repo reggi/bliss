@@ -15,8 +15,8 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       const name =
         node.name && ts.isIdentifier(node.name) ? node.name.text : undefined;
       const parameters = node.parameters.map((parameter) => {
-        const type = parameter.type
-          ? extractType(parameter.type)
+        const type = parameter.type 
+          ? extractType(parameter.type, typeChecker)
           : { name: "any", required: true };
         return {
           name: ts.isIdentifier(parameter.name)
@@ -45,8 +45,8 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         ts.isFunctionExpression(expression)
       ) {
       parameters = expression.parameters.map((parameter) => {
-           const type = parameter.type
-            ? extractType(parameter.type)
+           const type = parameter.type 
+            ? extractType(parameter.type, typeChecker)
             : { name: "any", required: true };
           return {
             name: ts.isIdentifier(parameter.name)
