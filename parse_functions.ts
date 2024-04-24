@@ -3,9 +3,29 @@ import { AstValues, Blissfile } from "./types.ts";
 import { createAstFromSource } from "./test_source.ts";
 
 export function parseFunctions(ast: AstValues): Blissfile {
-  const { sourceFile, typeChecker } = ast;
+  const { sourceFile } = ast;
   if (!sourceFile) return [];
-  return [];
+
+  const blissfile: Blissfile = [];
+  ts.forEachChild(sourceFile, node => {
+    if (ts.isFunctionDeclaration(node) || ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
+      const isDefault = node.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.DefaultKeyword) ?? false;
+      const name = node.name?.text;
+      const parameters = node.parameters.map(parameter => ({
+        name: parameter.name.getText(),
+        required: !parameter.questionToken,
+        type: parameter.type ? parameter.type.getText() : 'any'
+      }));
+
+      blissfile.push({
+        isDefault,
+        name,
+        parameters
+      });
+    }
+  });
+
+  return blissfile;
 }
 
 const source = `export default (name: string) => name;`;
