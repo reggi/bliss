@@ -1,7 +1,7 @@
 import ts from "npm:typescript";
 import { AstValues, FunctionDef } from "./types.ts";
 
-export function parseFunctions(ast: AstValues): FunctionDef[] {
+export function parseFunctions(ast: AstValues, typeChecker: ts.TypeChecker): FunctionDef[] {
   const { sourceFile } = ast;
   if (!sourceFile) return [];
   const functionDefs: FunctionDef[] = [];
@@ -14,25 +14,12 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       const name = node.name && ts.isIdentifier(node.name) ? node.name.text : undefined;
       const parameters = node.parameters.map((parameter) => {
         const typeNode = parameter.type;
-        let type;
-        if (typeNode) {
-          type = getTypeFromTypeNode(typeNode);
-        } else {
-          type = "any";
-        }
-        if (ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)) {
-          return {
-            name: 'pattern', // Use 'pattern' as a placeholder name for binding patterns
-            required: !parameter.questionToken,
-            type: type === "any" ? "object" : type, // If type is any, it's likely an object pattern
-          };
-        } else {
-          return {
-            name: parameter.name.getText(),
-            required: !parameter.questionToken,
-            type,
-          };
-        }
+        const type = typeNode ? typeChecker.typeToString(typeChecker.getTypeFromTypeNode(typeNode)) : "any";
+        return {
+          name: ts.isIdentifier(parameter.name) ? parameter.name.text : undefined,
+          required: !parameter.questionToken,
+          type,
+        };
       });
 
       // Correct the structure of the object being pushed to blissfile
@@ -52,19 +39,16 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         ts.isArrowFunction(expression) ||
         ts.isFunctionExpression(expression)
       ) {
-        parameters = expression.parameters.map((parameter) =>
-          ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)
-            ? {
-                name: 'pattern', // Use 'pattern' as a placeholder name for binding patterns
-                required: !parameter.questionToken,
-                type: "object", // Assume object type for binding patterns
-              }
-            : {
-                name: parameter.name.getText(),
-                required: !parameter.questionToken,
-                type: getTypeFromTypeNode(parameter.type || ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)),
-              }
-        );
+        parameters = expression.parameters.map((parameter) => {
+          const type = parameter.type
+            ? typeChecker.typeToString(typeChecker.getTypeFromTypeNode(parameter.type))
+            : "any";
+          return {
+            name: ts.isIdentifier(parameter.name) ? parameter.name.text : undefined,
+            required: !parameter.questionToken,
+            type,
+          };
+        });
       }
       // Push the function definition to the blissfile array
       functionDefs.push({
@@ -76,30 +60,5 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
   });
 
   return functionDefs;
-}
-function getTypeFromTypeNode(typeNode: ts.TypeNode): any {
-  interface MemberShape {
-    [key: string]: {
-      required: boolean;
-      type: any;
-    };
-  }
-
-  if (ts.isTypeLiteralNode(typeNode)) {
-    const members: MemberShape = {};
-    typeNode.members.forEach(member => {
-      if (ts.isPropertySignature(member) && member.type) {
-        const memberName = member.name.getText();
-        members[memberName] = {
-          required: !member.questionToken,
-          type: getTypeFromTypeNode(member.type),
-        };
-      }
-    });
-    return members;
-  } else if (ts.isTypeReferenceNode(typeNode)) {
-    return { name: typeNode.typeName.getText() };
-  }
-  return "any"; // Fallback to "any" if type cannot be determined
 }
 
