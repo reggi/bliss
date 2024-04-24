@@ -11,7 +11,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         node.modifiers?.some(
           (modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword
         ) ?? false;
-      const name = node.name?.text;
+      const name = node.name?.text || (ts.isIdentifier(node.name) ? node.name.text : undefined);
       const parameters = node.parameters.map((parameter) => {
         const typeNode = parameter.type;
         let type;
@@ -20,11 +20,19 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         } else {
           type = "any";
         }
-        return {
-          name: parameter.name.getText(),
-          required: !parameter.questionToken,
-          type,
-        };
+        if (ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)) {
+          return {
+            name: undefined, // Object and array patterns don't have a single name
+            required: !parameter.questionToken,
+            type: type === "any" ? "object" : type, // If type is any, it's likely an object pattern
+          };
+        } else {
+          return {
+            name: parameter.name.getText(),
+            required: !parameter.questionToken,
+            type,
+          };
+        }
       });
 
       // Correct the structure of the object being pushed to blissfile
@@ -39,29 +47,24 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       const defaultExport = true;
       const name = undefined;
       const expression = node.expression;
-      let parameters: {
-        name: string;
-        required: boolean;
-        type: string;
-      }[] = [];
+      let parameters: FunctionDef['parameters'] = [];
       if (
         ts.isArrowFunction(expression) ||
         ts.isFunctionExpression(expression)
       ) {
-        parameters = expression.parameters.map((parameter) => {
-          const typeNode = parameter.type;
-          let type: string;
-          if (typeNode) {
-            type = getTypeFromTypeNode(typeNode);
-          } else {
-            type = "any";
-          }
-          return {
-            name: parameter.name.getText(),
-            required: !parameter.questionToken,
-            type,
-          };
-        });
+        parameters = expression.parameters.map((parameter) =>
+          ts.isObjectBindingPattern(parameter.name) || ts.isArrayBindingPattern(parameter.name)
+            ? {
+                name: undefined, // Object and array patterns don't have a single name
+                required: !parameter.questionToken,
+                type: "object", // Assume object type for binding patterns
+              }
+            : {
+                name: parameter.name.getText(),
+                required: !parameter.questionToken,
+                type: getTypeFromTypeNode(parameter.type || ts.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)),
+              }
+        );
       }
       // Push the function definition to the blissfile array
       functionDefs.push({
