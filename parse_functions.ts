@@ -76,7 +76,12 @@ function extractType(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker
 ): string {
-  if (ts.isTypeLiteralNode(typeNode)) {
+  if (ts.isTypeReferenceNode(typeNode)) {
+    return typeChecker.typeToString(
+      typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
+    );
+  }
+  else if (ts.isTypeLiteralNode(typeNode)) {
     const properties = typeNode.members.map((member) => {
       if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
         const type = member.type
@@ -88,27 +93,11 @@ function extractType(
         if (!memberName) {
           throw new Error("Member name is not an identifier.");
         }
-        return {
-          name: memberName,
-          required: !member.questionToken,
-          type: typeName,
-        };
+        return `${memberName}: ${typeName}`;
       }
-    });
-    const typeObject: Record<string, { required: boolean; type: any }> = {};
-    properties.forEach((prop) => {
-      if (prop)
-        typeObject[prop.name] = { required: prop.required, type: prop.type };
-    });
-    return { name: typeObject, required: true };
-  } else if (ts.isTypeReferenceNode(typeNode)) {
-    return typeChecker.typeToString(
-      typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
-    );
+      return '';
+    }).filter(Boolean).join(", ");
+    return `{ ${properties} }`;
   }
-  // Convert the typeObject to a string representation of the type
-  const typeEntries = Object.entries(typeObject).map(
-    ([key, value]) => `${key}: ${value.type}`
-  );
-  return `{ ${typeEntries.join(", ")} }`;
+  return "any";
 }
