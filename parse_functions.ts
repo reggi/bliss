@@ -38,10 +38,10 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         ) ?? false;
       const functionName = node.name?.text || (isDefault ? undefined : "");
       const parameters = node.parameters.map((parameter): ParamDef => {
-        let type: string | { [key: string]: TypeDef } = "any";
+        let type: TypeDef['type'] = "any";
         if (parameter.type) {
           const extractedType = extractType(parameter.type, typeChecker);
-          type = typeof extractedType === 'string' ? extractedType : JSON.stringify(extractedType);
+          type = extractedType;
         }
         const paramName = getParameterName(parameter, sourceFile);
         const paramType = type;
@@ -72,10 +72,10 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       ) {
         parameters = expression.parameters.map((parameter): ParamDef => {
           const paramName = getParameterName(parameter, sourceFile);
-          const paramType: string | { [key: string]: TypeDef } = parameter.type
+          const paramType: TypeDef['type'] = parameter.type
             ? extractType(parameter.type, typeChecker)
             : "any";
-          const typeString = typeof paramType === 'string' ? paramType : JSON.stringify(paramType);
+          const typeString = paramType;
           return {
             name: paramName,
             required: !parameter.questionToken,
@@ -108,6 +108,7 @@ function extractType(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker
 ): string | { [key: string]: TypeDef } {
+): TypeDef['type'] {
   // ... rest of the extractType function remains unchanged ...
   if (ts.isTypeReferenceNode(typeNode) || ts.isToken(typeNode) && ts.SyntaxKind[typeNode.kind].endsWith('Keyword')) {
     return typeChecker.typeToString(
@@ -125,7 +126,8 @@ function extractType(
           ? extractType(member.type, typeChecker)
           : "any";
         const memberName = member.name.text;
-        const optional = member.questionToken ? false : true;
+        const required = !member.questionToken;
+        properties[memberName] = { required: required, type: type };
         properties[memberName] = { required: optional, type: type };
       }
     });
