@@ -1,5 +1,29 @@
 import ts from "npm:typescript";
-import { AstValues, FunctionDef, TypeDef } from "./types.ts";
+
+/** ai do not change */
+export type AstValues = {
+  program: ts.Program;
+  typeChecker: ts.TypeChecker;
+  sourceFile?: ts.SourceFile;
+};
+
+/** ai do not change */
+export type TypeDef = {
+  type: string | { [key: string]: TypeDef };
+  required: boolean;
+};
+
+/** ai do not change */
+export type ParamDef = TypeDef & {
+  name: string;
+};
+
+/** ai do not change */
+export type FunctionDef = {
+  default: boolean;
+  name: string | undefined;
+  parameters: ParamDef[];
+};
 
 export function parseFunctions(ast: AstValues): FunctionDef[] {
   const { sourceFile, typeChecker } = ast;
@@ -24,7 +48,10 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
             ? parameter.name.text
             : "";
         if (!ts.isIdentifier(parameter.name)) {
-          throw new Error("Parameter name is not an identifier: " + ts.SyntaxKind[parameter.name.kind]);
+          throw new Error(
+            "Parameter name is not an identifier: " +
+              ts.SyntaxKind[parameter.name.kind]
+          );
         }
         const paramType = type;
         return {
@@ -102,7 +129,6 @@ function extractType(
         properties[memberName] = { required: optional, type: type };
       }
     });
-    return properties;
     return properties;
   }
   return "any";
