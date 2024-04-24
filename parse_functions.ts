@@ -11,10 +11,10 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       const isDefault = node.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.DefaultKeyword) ?? false;
       const functionName = node.name?.text || (isDefault ? undefined : "");
       const parameters = node.parameters.map((parameter) => {
-        let type: string | string[] = "any";
+        let type: string | { [key: string]: TypeDef } = "any";
         if (parameter.type) {
           const extractedType = extractType(parameter.type, typeChecker);
-          type = typeof extractedType === 'string' ? extractedType : extractedType.map(t => t.type);
+          type = extractedType;
         }
         const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : "";
         if (paramName === "") {
@@ -93,11 +93,11 @@ function extractType(
         if (!memberName) {
           throw new Error("Member name is not an identifier.");
         }
-        return memberName ? { name: memberName, required: !member.questionToken, type: typeName } : null;
+        return memberName ? { name: memberName, required: !member.questionToken, type: typeName } : undefined;
       }
-      return null;
+      return undefined;
     }).filter((p): p is { name: string; required: boolean; type: string } => p !== null);
-    return properties.length > 0 ? `{ ${properties.map(p => `${p.name}: ${p.type}`).join(", ")} }` : "any";
+    return properties.length > 0 ? properties.reduce((acc, p) => ({ ...acc, [p.name]: { type: p.type, required: p.required } }), {}) : "any";
   }
   return "any";
 }
