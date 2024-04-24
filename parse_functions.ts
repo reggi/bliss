@@ -11,14 +11,16 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       const isDefault = node.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.DefaultKeyword) ?? false;
       const functionName = node.name?.text || (isDefault ? undefined : "");
       const parameters = node.parameters.map((parameter) => {
-        const type = parameter.type
-          ? extractType(parameter.type, typeChecker)
-          : "any";
+        let type: string | string[] = "any";
+        if (parameter.type) {
+          const extractedType = extractType(parameter.type, typeChecker);
+          type = typeof extractedType === 'string' ? extractedType : extractedType.map(t => t.type);
+        }
         const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : "";
         if (paramName === "") {
           throw new Error("Parameter name is not an identifier.");
         }
-        const paramType = typeof type === 'string' ? type : type.map((t: { name: string; required: boolean; type: string | string[] }) => ({ name: t.name, required: t.required, type: t.type }));
+        const paramType = type;
         return { name: paramName, required: !parameter.questionToken, type: paramType };
       });
 
