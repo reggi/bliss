@@ -79,9 +79,9 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         ts.isArrowFunction(expression) ||
         ts.isFunctionExpression(expression)
       ) {
-        parameters = expression.parameters.map((parameter) => {
+        parameters = expression.parameters.map((parameter): { name: string; required: boolean; type: string } => {
           const type = parameter.type
-            ? extractType(parameter.type, typeChecker)
+            ? extractType(parameter.type, typeChecker) as string
             : "any";
           if (!ts.isIdentifier(parameter.name)) {
             throw new Error("Parameter name is not an identifier.");
@@ -109,7 +109,7 @@ function extractType(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker
 ): string | { [key: string]: TypeDef } {
-  if (ts.isTypeReferenceNode(typeNode) || ts.isStringKeyword(typeNode)) {
+  if (ts.isTypeReferenceNode(typeNode) || ts.isKeywordTypeNode(typeNode) && typeNode.kind === ts.SyntaxKind.StringKeyword) {
     return typeChecker.typeToString(
       typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
     );
