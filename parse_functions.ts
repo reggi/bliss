@@ -82,24 +82,22 @@ function extractType(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker
 ): string | { [key: string]: TypeDef } {
-  if (ts.isTypeLiteralNode(typeNode)) {
-    const properties: { [key: string]: TypeDef } = {};
-    typeNode.members.forEach((member) => {
-      if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
-        const type = member.type
-          ? extractType(member.type, typeChecker)
-          : "any";
-        const memberName = member.name.text;
-        const optional = member.questionToken ? false : true;
-        properties[memberName] = { required: optional, type: type };
-      }
-    });
-    return properties;
-  } else {
-    // Handle other type nodes that are not TypeLiteralNode
+  if (ts.isTypeReferenceNode(typeNode) || ts.isStringKeyword(typeNode)) {
     return typeChecker.typeToString(
       typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
     );
+  } else if (ts.isLiteralTypeNode(typeNode) && typeNode.literal) {
+    return typeChecker.typeToString(
+      typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
+    );
+  } else if (ts.isTypeLiteralNode(typeNode)) {
+    const properties = typeNode.members.flatMap((member) => {
+      if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
+        const type = member.type
+          ? typeChecker.typeToString(typeChecker.getTypeFromTypeNode(member.type))
+          : "any";
+        const memberName = member.name.text;
+        const optional = member.questionToken ? "?" : "";
     const properties: { [key: string]: TypeDef } = {};
     typeNode.members.forEach((member) => {
       if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
@@ -115,4 +113,5 @@ function extractType(
     });
     return properties;
   }
+  return "any";
 }
