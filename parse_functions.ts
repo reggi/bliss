@@ -20,11 +20,8 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         if (!paramName) {
           throw new Error("Parameter name is not an identifier.");
         }
-        return {
-          name: paramName,
-          required: !parameter.questionToken,
-          type,
-        };
+        const paramType = typeof type === 'string' ? type : type.map(t => ({ name: t.name, required: t.required, type: t.type }));
+        return { name: paramName, required: !parameter.questionToken, type: paramType };
       });
 
       // Push the function definition to the functionDefs array
@@ -75,7 +72,11 @@ function extractType(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker
 ): string {
-  if (ts.isTypeReferenceNode(typeNode) || ts.isLiteralTypeNode(typeNode)) {
+  if (ts.isTypeReferenceNode(typeNode)) {
+    return typeChecker.typeToString(
+      typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
+    );
+  } else if (ts.isLiteralTypeNode(typeNode) && typeNode.literal) {
     return typeChecker.typeToString(
       typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
     );
@@ -92,11 +93,11 @@ function extractType(
         if (!memberName) {
           throw new Error("Member name is not an identifier.");
         }
-        return `${memberName}: ${typeName}`;
+        return { name: memberName, required: !member.questionToken, type: typeName };
       }
       return null;
-    }).filter(Boolean).join(", ");
-    return properties.length > 0 ? `{ ${properties} }` : "any";
+    }).filter(Boolean);
+    return properties.length > 0 ? `{ ${properties.map(p => `${p.name}: ${p.type}`).join(", ")} }` : "any";
   }
   return "any";
 }
