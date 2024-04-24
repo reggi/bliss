@@ -38,10 +38,13 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
         ) ?? false;
       const functionName = node.name?.text || (isDefault ? undefined : "");
       const parameters = node.parameters.map((parameter): ParamDef => {
-        let type: TypeDef['type'] = "any";
+        let type: TypeDef['type'];
         if (parameter.type) {
           const extractedType = extractType(parameter.type, typeChecker);
           type = extractedType;
+        }
+        } else {
+          type = "any";
         }
         const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : "unnamedParam";
         const paramType = type;
@@ -72,9 +75,12 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
       ) {
         parameters = expression.parameters.map((parameter): ParamDef => {
             const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : "unnamedParam";
-            const paramType: TypeDef['type'] = parameter.type
-            ? extractType(parameter.type, typeChecker)
-            : "any";
+            let paramType: TypeDef['type'];
+            if (parameter.type) {
+              paramType = extractType(parameter.type, typeChecker);
+            } else {
+              paramType = "any";
+            }
           const typeString = paramType;
           return {
             name: paramName,
