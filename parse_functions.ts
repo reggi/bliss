@@ -40,7 +40,7 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
     } else if (ts.isExportAssignment(node)) {
       // Handle default export of an arrow function
       const defaultExport = true;
-      const name = undefined;
+      const name = "default";
       const expression = node.expression;
       let parameters: { name: string; required: boolean; type: string }[] = [];
       if (
@@ -76,7 +76,7 @@ function extractType(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker
 ): string {
-  if (ts.isTypeReferenceNode(typeNode)) {
+  if (ts.isTypeReferenceNode(typeNode) || ts.isLiteralTypeNode(typeNode)) {
     return typeChecker.typeToString(
       typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
     );
