@@ -1,5 +1,5 @@
 import ts from "npm:typescript";
-import { AstValues, FunctionDef } from "./types.ts";
+import { AstValues, FunctionDef, TypeDef } from "./types.ts";
 
 export function parseFunctions(ast: AstValues): FunctionDef[] {
   const { sourceFile, typeChecker } = ast;
@@ -8,7 +8,10 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
   ts.forEachChild(sourceFile, (node) => {
     // ... rest of the code remains unchanged ...
     if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node)) {
-      const isDefault = node.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.DefaultKeyword) ?? false;
+      const isDefault =
+        node.modifiers?.some(
+          (modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword
+        ) ?? false;
       const functionName = node.name?.text || (isDefault ? undefined : "");
       const parameters = node.parameters.map((parameter) => {
         let type: string | { [key: string]: TypeDef } = "any";
@@ -16,12 +19,19 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
           const extractedType = extractType(parameter.type, typeChecker);
           type = extractedType;
         }
-        const paramName = parameter.name && ts.isIdentifier(parameter.name) ? parameter.name.text : "";
+        const paramName =
+          parameter.name && ts.isIdentifier(parameter.name)
+            ? parameter.name.text
+            : "";
         if (paramName === "") {
           throw new Error("Parameter name is not an identifier.");
         }
         const paramType = type;
-        return { name: paramName, required: !parameter.questionToken, type: paramType };
+        return {
+          name: paramName,
+          required: !parameter.questionToken,
+          type: paramType,
+        };
       });
 
       // Push the function definition to the functionDefs array
@@ -80,24 +90,42 @@ function extractType(
     return typeChecker.typeToString(
       typeChecker.getTypeFromTypeNode(typeNode) as ts.Type
     );
-  }
-  else if (ts.isTypeLiteralNode(typeNode)) {
-    const properties = typeNode.members.map((member) => {
-      if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
-        const type = member.type
-          ? typeChecker.getTypeFromTypeNode(member.type)
-          : "any";
-        const typeName = typeChecker.typeToString(type as ts.Type);
-        const memberName =
-          member.name && ts.isIdentifier(member.name) ? member.name.text : "";
-        if (!memberName) {
-          throw new Error("Member name is not an identifier.");
+  } else if (ts.isTypeLiteralNode(typeNode)) {
+    const properties = typeNode.members
+      .map((member) => {
+        if (ts.isPropertySignature(member) && ts.isIdentifier(member.name)) {
+          const type = member.type
+            ? typeChecker.getTypeFromTypeNode(member.type)
+            : "any";
+          const typeName = typeChecker.typeToString(type as ts.Type);
+          const memberName =
+            member.name && ts.isIdentifier(member.name) ? member.name.text : "";
+          if (!memberName) {
+            throw new Error("Member name is not an identifier.");
+          }
+          return memberName
+            ? {
+                name: memberName,
+                required: !member.questionToken,
+                type: typeName,
+              }
+            : undefined;
         }
-        return memberName ? { name: memberName, required: !member.questionToken, type: typeName } : undefined;
-      }
-      return undefined;
-    }).filter((p): p is { name: string; required: boolean; type: string } => p !== null);
-    return properties.length > 0 ? properties.reduce((acc, p) => ({ ...acc, [p.name]: { type: p.type, required: p.required } }), {}) : "any";
+        return undefined;
+      })
+      .filter(
+        (p): p is { name: string; required: boolean; type: string } =>
+          p !== null
+      );
+    return properties.length > 0
+      ? properties.reduce(
+          (acc, p) => ({
+            ...acc,
+            [p.name]: { type: p.type, required: p.required },
+          }),
+          {}
+        )
+      : "any";
   }
   return "any";
 }
