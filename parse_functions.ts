@@ -81,7 +81,6 @@ export function parseFunctions(ast: AstValues): FunctionDef[] {
 function extractType(
   typeNode: ts.TypeNode,
   typeChecker: ts.TypeChecker
-): string {
 ): string | { [key: string]: TypeDef } {
   if (ts.isTypeReferenceNode(typeNode) || ts.isStringKeyword(typeNode)) {
     return typeChecker.typeToString(
