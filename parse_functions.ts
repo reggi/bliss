@@ -59,7 +59,7 @@ const handleParameter = (parameter: ts.ParameterDeclaration): ParamDef => {
   };
 };
 
-export function parseFunctions(ast: AstValues) {
+export function parseFunctions(ast: AstValues): FunctionDef[] {
   const { sourceFile } = ast;
   if (!sourceFile) return [];
 

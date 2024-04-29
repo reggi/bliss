@@ -1,4 +1,4 @@
-import { parseArgs } from "https://deno.land/std@0.223.0/cli/parse_args.ts";
+import { parseArgs } from "jsr:@std/cli";
 import path from "npm:path";
 import { parseFunctions } from "./parse_functions.ts";
 import { astSource } from "./ast_source.ts";
