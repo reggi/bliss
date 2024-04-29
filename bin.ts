@@ -58,7 +58,7 @@ if (help) {
   console.log(help(blissfile));
 }
 
-const mod = await import(fullPath);
+const mod = await import(new URL(fullPath, "file://").toString());
 
 let caller = _.shift();
 if (!caller) caller = "default";

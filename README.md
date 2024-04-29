@@ -21,6 +21,16 @@ function signup(opts: { username: string, password: string}) {
 
 ---
 
+The current implementation is mainly designed to help the execution of "bin" or "cli" scripts.
+
+By setting your ts files `shebang` to 
+
+```ts
+#!/usr/bin/env -S deno run -A jsr:@reggi/bliss@1.0.0/bin
+```
+
+---
+
 # Phase one: functions
 
 As the above example, `functions` are phase one.
