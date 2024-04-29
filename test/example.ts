@@ -1,25 +1,15 @@
 #!/usr/bin/env -S deno run -A jsr:@reggi/bliss@1.0.0/bin
 
-/** @desc Logs the input */
+/** @desc Logs a and b */
 export default function example(
   /**
-   * @label Input
-   * @desc The input to log
+   * @desc Variable A
    */
-  input: string,
-  b: string
-) {
-  console.log({ input, b });
-}
-
-/** @desc Logs the xx Logs the xx Logs the xx Logs the xx Logs the xx */
-export function fighter(
+  a: string,
   /**
-   * @label Input
-   * @desc The input to log
+   * @desc Variable B
    */
-  input: string,
   b: string
 ) {
-  console.log(`f${input} ${b}`);
+  console.log({ a, b });
 }
