@@ -1,4 +1,4 @@
-import type ts from "npm:typescript";
+import type ts from "npm:typescript@5.4.5";
 
 export type AstValues = {
   program: ts.Program;

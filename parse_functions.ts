@@ -1,4 +1,4 @@
-import ts from "npm:typescript";
+import ts from "npm:typescript@5.4.5";
 import { AstValues, FunctionDef, TypeDef } from "./types.ts";
 import { ParamDef } from "./types.ts";
 
