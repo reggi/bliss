@@ -31,10 +31,6 @@ if (typeof file !== "string") {
 
 const fullPath = path.join(Deno.cwd(), file);
 
-const attempt = new URL("file", import.meta.url);
-
-console.log({ file, attempt, fullPath });
-
 const source = await Deno.readTextFile(fullPath);
 const blissfile = parseFunctions(astSource(source));
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run -A jsr:@reggi/bliss@2.0.0-beta.0/bin
+#!/usr/bin/env -S deno run -A jsr:@reggi/bliss@2.0.0-beta.1/bin
 
 /** @desc Logs a and b */
 export default function example(
