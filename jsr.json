@@ -1,6 +1,6 @@
 {
   "name": "@reggi/bliss",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "exports": {
     "./bin": "./bin.ts",
     "./parse_functions": "./parse_functions.ts"
