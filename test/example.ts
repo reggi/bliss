@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run -A /Users/thomasreggi/Desktop/bliss/blissparse/bin.ts
+#!/usr/bin/env -S deno run -A jsr:@reggi/bliss@1.0.0/bin
 
 /** @desc Logs the input */
 export default function example(

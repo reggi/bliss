@@ -2,6 +2,14 @@ import ts from "npm:typescript@5.4.5";
 import { AstValues, FunctionDef, TypeDef } from "./types.ts";
 import { ParamDef } from "./types.ts";
 
+/**
+ * This function traverses the AST to gather all
+ * functions in a file and standardize their
+ * inputs.
+ * @module
+ */
+
+/** gets jsdoc tags */
 const getJSDocTags = (
   parameter:
     | ts.ParameterDeclaration
@@ -25,6 +33,7 @@ const getJSDocTags = (
   return tagValues;
 };
 
+/** gets types from node */
 const getTypeFromNode = (node?: ts.TypeNode): TypeDef["type"] => {
   if (node && ts.isTypeLiteralNode(node)) {
     const properties: { [key: string]: TypeDef } = {};
@@ -43,6 +52,7 @@ const getTypeFromNode = (node?: ts.TypeNode): TypeDef["type"] => {
   return node?.getText() || undefined;
 };
 
+/** resolves a parameter type */
 const handleParameter = (parameter: ts.ParameterDeclaration): ParamDef => {
   const tags = getJSDocTags(parameter);
   const ignoreName = ts.isObjectBindingPattern(parameter.name);
@@ -59,6 +69,7 @@ const handleParameter = (parameter: ts.ParameterDeclaration): ParamDef => {
   };
 };
 
+/** parses all functions */
 export function parseFunctions(ast: AstValues): FunctionDef[] {
   const { sourceFile } = ast;
   if (!sourceFile) return [];

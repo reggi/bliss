@@ -6,6 +6,23 @@ import { FunctionDef } from "./types.ts";
 import { help as getHelp } from "./help.ts";
 import { spreadable } from "./spreadable.ts";
 
+/**
+ * @module
+ * This is a binary that allows you to pass a
+ * TypeScript file as an argument. It then parses
+ * the file's AST and JSDoc comments to gain
+ * awareness of the exported functions and their
+ * arguments, allowing you to pass those arguments
+ * as flags.
+ *
+ * Here's the shebang:
+ *
+ * ```ts
+ * #!/usr/bin/env -S deno run -A jsr:@reggi/bliss@1.0.0/bin
+ * ```
+ *
+ */
+
 const { _, help, ...argsObj } = parseArgs(Deno.args);
 const file = _.shift();
 
