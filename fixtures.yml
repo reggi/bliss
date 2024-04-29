@@ -1,0 +1,223 @@
+- comment: 0 exported default with name
+  input: |
+    export default function main (name: string) {
+      return name
+    }
+  output:
+    - isDefault: true
+      name: main
+      parameters:
+        - name: name
+          required: true
+          type: string
+- comment: 1 just name paramater
+  input: |
+    export default (name: string) => name;
+  output:
+    - isDefault: true
+      parameters:
+        - name: name
+          required: true
+          type: string
+- comment: 2 export const arrow
+  input: |
+    export const b = (b: string) => b  
+  output:
+    - isDefault: false
+      name: b
+      parameters:
+        - name: b
+          required: true
+          type: string
+- comment: 3 default nothing
+  input: |
+    export default () => {
+      return console.log(undefined);
+    };
+  output:
+    - isDefault: true
+      parameters: []
+- comment: 4 object param with required name property
+  input: |
+    export default (obj: { name: string }) => {
+      return console.log(obj.name);
+    };
+  output:
+    - isDefault: true
+      parameters:
+        - name: obj
+          required: true
+          type:
+            name:
+              type: string
+              required: true
+- comment: 5 object param with optional name property
+  input: |
+    export default (obj: { name?: string }) => {
+      return console.log(name);
+    };
+  output:
+    - isDefault: true
+      parameters:
+        - name: obj
+          required: true
+          type:
+            name:
+              type: string
+              required: false
+- comment: 6 option binding with optional param no default value
+  input: |
+    export default ({ name }: { name?: string }) => {
+      return console.log(name);
+    };
+  output:
+    - isDefault: true
+      parameters:
+        - required: true
+          type:
+            name:
+              type: string
+              required: false
+- comment: 7 option binding pattern, with non required param, with default value
+  input: |
+    export default ({ name }: { name?: string } = {}) => {
+      return console.log(name);
+    };
+  output:
+    - isDefault: true
+      parameters:
+        - required: false
+          type:
+            name:
+              type: string
+              required: false
+- comment: 8 should ignore exported functions with @private jsdoc tag
+  input: |
+    /** @private */
+    export const internal = (obj: { date: Date }) => {
+      return console.log(obj.date);
+    };
+
+    /** runs a date */
+    export const runDate = (obj?: { date: string }) => {
+      const date = new Date(obj.date);
+      return internal({ date });
+    };
+  output:
+    - isDefault: false
+      name: runDate
+      parameters:
+        - name: obj
+          required: false
+          type:
+            date:
+              type: string
+              required: true
+- comment: 9 dual arrow
+  input: |
+    export default (a: boolean) => a
+    export const b = (b: string) => b  
+  output:
+    - isDefault: true
+      parameters:
+        - name: a
+          required: true
+          type: boolean
+    - isDefault: false
+      name: b
+      parameters:
+        - name: b
+          required: true
+          type: string
+- comment: 10 jsdoc argument label
+  input: |
+    export default (
+      /** 
+      * @inputType password
+      * @label Name
+      */
+      name: string
+    ) => name;
+  output:
+    - isDefault: true
+      parameters:
+        - name: name
+          tags:
+            label: Name
+            inputType: password
+          required: true
+          type: string
+- comment: 11 function desc
+  input: |
+    /** @desc Logs the input */
+    export function example(input: string) {
+      console.log(input);
+    }
+  output:
+    - name: example
+      isDefault: false
+      tags: {
+        desc: Logs the input
+      }
+      parameters:
+        - name: input
+          required: true
+          type: string
+- comment: 12 duplicate argument
+  input: |
+    export default (obj: { name?: string } = {}, name: number) => {
+      return console.log(obj.name || "" + name);
+    };
+  output:
+    - isDefault: true
+      parameters:
+        - name: obj
+          required: false
+          type:
+            name:
+              type: string
+              required: false
+        - name: name
+          required: true
+          type: number
+- comment: 13 complex example
+  input: |
+    export function numberOne (
+      obj: { name?: string } = {},
+      name: number,
+      password: string
+    ) {
+      return console.log(obj.name || "" + name + password);
+    };
+
+    export function numberTwo (
+      age: number,
+      name: string,
+    ) {
+      return console.log(age + name);
+    };
+  output:
+    - name: numberOne
+      isDefault: false
+      parameters:
+      - name: obj
+        type:
+          name:
+            type: string
+            required: false
+        required: false
+      - name: name
+        type: number
+        required: true
+      - name: password
+        type: string
+        required: true
+    - name: numberTwo
+      isDefault: false
+      parameters:
+      - name: age
+        type: number
+        required: true
+      - name: name
+        type: string
+        required: true
