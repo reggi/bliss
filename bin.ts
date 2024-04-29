@@ -1,11 +1,3 @@
-import { parseArgs } from "jsr:@std/cli@0.224.0";
-import path from "node:path";
-import { parseFunctions } from "./parse_functions.ts";
-import { astSource } from "./ast_source.ts";
-import { FunctionDef } from "./types.ts";
-import { help as getHelp } from "./help.ts";
-import { spreadable } from "./spreadable.ts";
-
 /**
  * @module
  * This is a binary that allows you to pass a
@@ -20,8 +12,14 @@ import { spreadable } from "./spreadable.ts";
  * ```ts
  * #!/usr/bin/env -S deno run -A jsr:@reggi/bliss@1.0.0/bin
  * ```
- *
  */
+import { parseArgs } from "jsr:@std/cli@0.224.0";
+import path from "node:path";
+import { parseFunctions } from "./parse_functions.ts";
+import { astSource } from "./ast_source.ts";
+import { FunctionDef } from "./types.ts";
+import { help as getHelp } from "./help.ts";
+import { spreadable } from "./spreadable.ts";
 
 const { _, help, ...argsObj } = parseArgs(Deno.args);
 const file = _.shift();

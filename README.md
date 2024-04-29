@@ -2,7 +2,7 @@
 
 The philosophy around this project is kind of simple:
 
-> Most interface can be build from two simple parts, `content`, `forms` and `lists of forms`.
+> Most interfaces can be build from two simple parts, `content`, `forms` and `lists of forms`.
 
 It's the interplay between these three things that creats most modern interfaces, obviously there are edge cases, and specific uses, but most mobile apps, websitses, web apps, cli tools all abide by this same rule.
 

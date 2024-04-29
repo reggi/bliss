@@ -1,13 +1,12 @@
-import ts from "npm:typescript@5.4.5";
-import { AstValues, FunctionDef, TypeDef } from "./types.ts";
-import { ParamDef } from "./types.ts";
-
 /**
+ * @module
  * This function traverses the AST to gather all
  * functions in a file and standardize their
  * inputs.
- * @module
  */
+import ts from "npm:typescript@5.4.5";
+import { AstValues, FunctionDef, TypeDef } from "./types.ts";
+import { ParamDef } from "./types.ts";
 
 /** gets jsdoc tags */
 const getJSDocTags = (
