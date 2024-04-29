@@ -2,7 +2,7 @@ import ts from "npm:typescript";
 import { AstValues } from "./types.ts";
 
 /** creates ast objects from source code for testing */
-export function createAstFromSource(sourceCode: string): AstValues {
+export function astSource(sourceCode: string): AstValues {
   const sourceFileName = "file.ts";
   const compilerHost = ts.createCompilerHost({});
 

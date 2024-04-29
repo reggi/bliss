@@ -1,8 +1,8 @@
-import { parseFunctions } from "./parse_functions.ts";
-import { createAstFromSource } from "./test_source.ts";
 import { parseArgs } from "https://deno.land/std@0.223.0/cli/parse_args.ts";
 import path from "npm:path";
-import { FunctionDef, ParamDef } from "./types.ts";
+import { parseFunctions } from "./parse_functions.ts";
+import { astSource } from "./ast_source.ts";
+import { FunctionDef } from "./types.ts";
 import { help as getHelp } from "./help.ts";
 import { spreadable } from "./spreadable.ts";
 
@@ -16,17 +16,21 @@ if (typeof file !== "string") {
 
 const fullPath = path.join(Deno.cwd(), file);
 const source = await Deno.readTextFile(fullPath);
-const blissfile = parseFunctions(createAstFromSource(source));
+const blissfile = parseFunctions(astSource(source));
 
 if (help) {
   console.log(getHelp(blissfile));
   Deno.exit(1);
 }
 
-const bs = blissfile.map((fn): FunctionDef & { caller?: string } => {
+const bs = blissfile.map((fn): FunctionDef & { caller: string[] } => {
   return {
     ...fn,
-    caller: fn.isDefault ? "default" : fn.name,
+    caller: fn.isDefault
+      ? ["default", ...(fn.name ? [fn.name] : [])]
+      : fn.name
+      ? [fn.name]
+      : [],
   };
 });
 
@@ -39,10 +43,19 @@ const mod = await import(fullPath);
 let caller = _.shift();
 if (!caller) caller = "default";
 
-const bsMatch = bs.find((fn) => fn.caller === caller);
+if (typeof caller !== "string") {
+  console.error("caller must be a string");
+  Deno.exit(1);
+}
+
+const bsMatch = bs.find((fn) => fn.caller.includes(caller));
 
 if (!bsMatch) {
   throw new Error(`Command ${caller} not found`);
 }
 
-mod[caller](...spreadable(bsMatch, argsObj));
+if (bsMatch.isDefault) {
+  mod.default(...spreadable(bsMatch, argsObj));
+} else {
+  mod[caller](...spreadable(bsMatch, argsObj));
+}

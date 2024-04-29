@@ -12,7 +12,7 @@ export default function example(
   console.log({ input, b });
 }
 
-/** @desc Logs the input */
+/** @desc Logs the xx Logs the xx Logs the xx Logs the xx Logs the xx */
 export function fighter(
   /**
    * @label Input

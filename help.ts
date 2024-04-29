@@ -53,20 +53,34 @@ export const help = (bf: FunctionDef[]) => {
   const withoutDefault = bf.filter((fn) => !fn.isDefault);
   bf = defaultFn ? [defaultFn, ...withoutDefault] : bf;
   const flags = bf
-    .map((fn) => {
-      let { isDefault, name, parameters } = fn;
+    .map((fn, index) => {
+      let { isDefault, name, parameters, tags } = fn;
       const params = parameters || [];
+      const p = params.map((param) => handleParam(param).flat());
+
       name = opt`${name}`;
       if (name && isDefault) name = opt`[${name}]`;
-      const p = params.map((param) => handleParam(param).flat());
       if (!name) name = `<default>`;
-      return p.map((v, i) => {
-        if (i === 0) return [name, ...v];
+
+      const prepend = [name, `$${index}`];
+
+      const flags = p.map((v, i) => {
         return ["", ...v];
       });
+
+      const current = [prepend, ...flags];
+
+      return current;
     })
     .flat();
-  return tabularLogger(flags);
+
+  let current = tabularLogger(flags);
+
+  bf.map((fn, index) => {
+    current = current.replace(`$${index}`, fn.tags?.desc || "");
+  });
+
+  return current;
 };
 
 // import { fixtures } from "./fixtures.ts";
