@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.223.0/assert/assert_equals.ts";
+import { assertEquals } from "jsr:@std/assert@0.224.0/assert-equals";
 import { parseFunctions } from "../parse_functions.ts";
 import { astSource } from "../ast_source.ts";
 import { fixtures } from "./fixtures.ts";

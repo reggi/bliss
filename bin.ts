@@ -1,4 +1,4 @@
-import { parseArgs } from "jsr:@std/cli";
+import { parseArgs } from "jsr:@std/cli@0.224.0";
 import path from "npm:path";
 import { parseFunctions } from "./parse_functions.ts";
 import { astSource } from "./ast_source.ts";

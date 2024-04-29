@@ -1,6 +1,13 @@
-import { parse } from "https://deno.land/std@0.223.0/yaml/mod.ts";
+import { parse } from "jsr:@std/yaml@0.224.0";
+import path from "node:path";
 
-const rawfixture = await Deno.readTextFile("./fixtures.yml");
+if (!import.meta.dirname) {
+  throw new Error("import.meta.dirname not found");
+}
+
+const rawfixture = await Deno.readTextFile(
+  path.join(import.meta.dirname, "./fixtures.yml")
+);
 
 export const fixtures = parse(rawfixture) as {
   comment: string;
