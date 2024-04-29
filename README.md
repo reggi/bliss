@@ -26,7 +26,36 @@ The current implementation is mainly designed to help the execution of "bin" or 
 By setting your ts files `shebang` to 
 
 ```ts
-#!/usr/bin/env -S deno run -A jsr:@reggi/bliss@1.0.0/bin
+#!/usr/bin/env -S deno run -A jsr:@reggi/bliss@2.0.0/bin
+
+/** @desc Logs a and b */
+export default function example(
+  /**
+   * @desc Variable A
+   */
+  a: string,
+  /**
+   * @desc Variable B
+   */
+  b: string
+) {
+  console.log({ a, b });
+}
+```
+
+You can then run `chmod +x ./script`
+Then `./script.ts --help` will print:
+
+```
+  [example]  Logs a and b 
+             --a  <string>  Variable A
+             --b  <string>  Variable B
+```
+
+And `./script.ts --a "hello" --b "world"` will print:
+
+```
+{ a: "hello", b: "world" }
 ```
 
 ---
