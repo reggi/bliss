@@ -1,5 +1,5 @@
 import { parseArgs } from "jsr:@std/cli@0.224.0";
-import path from "npm:path";
+import path from "node:path";
 import { parseFunctions } from "./parse_functions.ts";
 import { astSource } from "./ast_source.ts";
 import { FunctionDef } from "./types.ts";
